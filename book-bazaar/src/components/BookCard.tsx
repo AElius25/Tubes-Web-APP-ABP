@@ -30,6 +30,7 @@ export function BookCard({ book, index = 0 }: BookCardProps) {
     }
 
     await addToCart(book.id);
+    toast.success('Buku ditambahkan ke keranjang');
   };
 
   const formatPrice = (price: number) => {
@@ -47,73 +48,82 @@ export function BookCard({ book, index = 0 }: BookCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
-      className="book-card group"
+      className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-[#A9B5DF]/20"
+      style={{ fontFamily: 'Trench, sans-serif' }}
     >
-      {/* Cover Image */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+      {/* Cover Image Container */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#FFF2F2]">
         {book.cover_image ? (
           <img
             src={book.cover_image}
             alt={book.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy/10 to-gold/10">
-            <span className="font-serif text-4xl text-navy/30">📚</span>
+          <div className="w-full h-full flex items-center justify-center bg-[#2D336B]/5">
+            <span className="text-4xl opacity-20">📚</span>
           </div>
         )}
         
-        {/* Stock Badge */}
-        <div className="absolute top-3 right-3">
-          {isOutOfStock ? (
-            <span className="badge-out-of-stock">Habis</span>
-          ) : (
-            <span className="badge-in-stock">Stok: {book.stock}</span>
-          )}
-        </div>
-
-        {/* Category */}
-        {book.category && (
-          <div className="absolute top-3 left-3">
-            <span className="bg-gold/90 text-secondary-foreground text-xs px-2 py-1 rounded-full font-medium">
+        {/* Badges Layout */}
+        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+          {book.category && (
+            <span className="bg-[#2D336B] text-white text-[9px] font-black px-3 py-1.5 rounded-full tracking-[0.2em] uppercase shadow-lg">
               {book.category}
             </span>
-          </div>
-        )}
+          )}
+          <span className={`${isOutOfStock ? 'bg-red-500 text-white' : 'bg-[#FFF2F2]/90 text-[#7886C7] border border-[#A9B5DF]/30'} backdrop-blur-md text-[9px] font-bold px-3 py-1.5 rounded-full tracking-widest`}>
+            {isOutOfStock ? 'HABIS' : `STOK: ${book.stock}`}
+          </span>
+        </div>
 
-        {/* Quick Actions Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-          <div className="flex gap-2">
+        {/* Quick Actions Overlay - SEKARANG LEBIH SELARAS */}
+        <div className="absolute inset-0 bg-[#2D336B]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+          <div className="flex gap-2 px-4 w-full justify-center">
             <Button
               size="sm"
-              variant="secondary"
               onClick={() => navigate(`/book/${book.id}`)}
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              className="flex-1 max-w-[100px] bg-white text-[#2D336B] hover:bg-[#FFF2F2] rounded-full h-9 font-bold tracking-widest text-[10px] border-none shadow-xl transition-transform active:scale-95"
             >
-              <Eye className="h-4 w-4 mr-1" />
-              Detail
+              <Eye className="h-3.5 w-3.5 mr-1.5" />
+              DETAIL
             </Button>
+            
             {!isOutOfStock && (
               <Button
                 size="sm"
                 onClick={handleAddToCart}
-                className="bg-gold text-secondary-foreground hover:bg-gold-dark"
+                className="flex-1 max-w-[100px] bg-[#A9B5DF] text-[#2D336B] hover:bg-white rounded-full h-9 font-bold tracking-widest text-[10px] border-none shadow-xl transition-transform active:scale-95"
               >
-                <ShoppingCart className="h-4 w-4 mr-1" />
-                Beli
+                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                BELI
               </Button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-2">
-        <h3 className="font-serif text-lg font-semibold text-foreground line-clamp-2 leading-tight">
+      {/* Content Area */}
+      <div className="p-6">
+        <h3 
+          style={{ fontFamily: 'DashHorizon, sans-serif' }}
+          className="text-lg text-[#2D336B] line-clamp-1 italic tracking-wider mb-1"
+        >
           {book.title}
         </h3>
-        <p className="text-muted-foreground text-sm">{book.author}</p>
-        <p className="font-bold text-lg text-gold">{formatPrice(book.price)}</p>
+        <p className="text-[#7886C7] text-[10px] font-bold tracking-[0.2em] uppercase mb-4 opacity-80">
+          {book.author}
+        </p>
+        
+        <div className="flex items-center justify-between pt-4 border-t border-[#FFF2F2]">
+          <span className="text-[#2D336B] font-black text-xl tracking-tighter">
+            {formatPrice(book.price)}
+          </span>
+          {/* Decorative Dot */}
+          <div className="w-8 h-8 rounded-full bg-[#FFF2F2] flex items-center justify-center">
+             <div className="w-2 h-2 rounded-full bg-[#A9B5DF] animate-pulse" />
+          </div>
+        </div>
       </div>
     </motion.div>
   );

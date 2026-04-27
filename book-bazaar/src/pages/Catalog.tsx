@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Search, Filter, BookOpen } from 'lucide-react';
+import { Search, BookOpen } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { BookCard } from '@/components/BookCard';
 import { useBooks } from '@/hooks/useBooks';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 const categories = [
@@ -36,59 +35,61 @@ export default function Catalog() {
   }, [books, searchQuery, selectedCategory]);
 
   return (
-    <div className="page-container">
+    <div className="min-h-screen bg-[#FFF2F2]" style={{ fontFamily: 'Trench, sans-serif' }}>
       <Navbar />
 
-      {/* Header */}
-      <section className="bg-primary py-12">
-        <div className="content-container">
+      {/* Header - Konsisten dengan tema Blue-Dark */}
+      <section className="bg-[#2D336B] pt-32 pb-20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#A9B5DF]/10 rounded-full -mr-32 -mt-32 blur-3xl" />
+        <div className="content-container relative z-10 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
           >
-            <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-              Katalog <span className="text-gold">Buku</span>
+            <h1 
+              style={{ fontFamily: 'DashHorizon, sans-serif' }}
+              className="text-5xl md:text-6xl text-white italic tracking-widest mb-4"
+            >
+              EXPLORE <span className="text-[#A9B5DF]">CATALOG</span>
             </h1>
-            <p className="text-primary-foreground/70 max-w-xl mx-auto">
-              Temukan buku favoritmu dari koleksi lengkap kami
+            <p className="text-white/60 max-w-xl mx-auto uppercase tracking-[0.3em] text-xs">
+              Temukan koleksi literatur original dengan kualitas terbaik
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Search & Filter */}
-      <section className="py-6 border-b border-border bg-card sticky top-16 z-40">
+      {/* Search & Filter - Sticky Navigation */}
+      <section className="sticky top-20 z-40 bg-[#FFF2F2]/80 backdrop-blur-md border-b border-[#2D336B]/5 py-6 shadow-sm">
         <div className="content-container">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search Input */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <div className="flex flex-col lg:flex-row gap-6 items-center">
+            
+            {/* Search Input - Fixed Caps & Color Issues */}
+            <div className="relative w-full lg:w-1/3">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7886C7]" />
               <Input
                 type="text"
                 placeholder="Cari judul atau penulis..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-12 bg-white border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 tracking-widest text-sm text-[#2D336B]"
               />
             </div>
 
             {/* Category Filter */}
-            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+            <div className="flex gap-3 overflow-x-auto w-full pb-2 no-scrollbar">
               {categories.map((category) => (
-                <Button
+                <button
                   key={category}
-                  variant={selectedCategory === category ? 'default' : 'outline'}
-                  size="sm"
                   onClick={() => setSelectedCategory(category)}
-                  className={`whitespace-nowrap ${
+                  className={`px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all whitespace-nowrap border ${
                     selectedCategory === category
-                      ? 'bg-gold text-secondary-foreground hover:bg-gold-dark'
-                      : ''
+                      ? 'bg-[#2D336B] text-white border-[#2D336B] shadow-lg'
+                      : 'bg-white text-[#2D336B] border-[#A9B5DF]/30 hover:border-[#2D336B]'
                   }`}
                 >
                   {category}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -96,42 +97,71 @@ export default function Catalog() {
       </section>
 
       {/* Books Grid */}
-      <section className="py-10">
+      <section className="py-12">
         <div className="content-container">
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
               {[...Array(10)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="aspect-[3/4] bg-muted rounded-lg" />
-                  <div className="mt-4 h-4 bg-muted rounded w-3/4" />
-                  <div className="mt-2 h-3 bg-muted rounded w-1/2" />
+                  <div className="aspect-[3/4] bg-[#A9B5DF]/20 rounded-2xl" />
+                  <div className="mt-4 h-3 bg-[#A9B5DF]/20 rounded w-3/4" />
                 </div>
               ))}
             </div>
           ) : filteredBooks.length > 0 ? (
             <>
-              <p className="text-muted-foreground mb-6">
-                Menampilkan {filteredBooks.length} buku
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="flex justify-between items-center mb-8">
+                <p className="text-[#7886C7] text-xs font-bold tracking-[0.2em] uppercase">
+                  Menampilkan {filteredBooks.length} Buku
+                </p>
+                <div className="h-[1px] flex-1 bg-[#2D336B]/5 ml-6" />
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                 {filteredBooks.map((book, index) => (
-                  <BookCard key={book.id} book={book} index={index} />
+                  <motion.div
+                    key={book.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: (index % 5) * 0.1 }}
+                  >
+                    <BookCard book={book} index={index} />
+                  </motion.div>
                 ))}
               </div>
             </>
           ) : (
-            <div className="text-center py-20">
-              <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
-                Buku Tidak Ditemukan
+            <div className="text-center py-32 bg-white rounded-[3rem] border border-[#A9B5DF]/20 shadow-sm">
+              <BookOpen className="h-16 w-16 text-[#A9B5DF] mx-auto mb-6 opacity-30" />
+              <h3 
+                style={{ fontFamily: 'DashHorizon, sans-serif' }}
+                className="text-2xl text-[#2D336B] italic tracking-widest mb-2"
+              >
+                NOT <span className="text-[#A9B5DF]">FOUND</span>
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-[#7886C7] text-sm uppercase tracking-widest">
                 Coba gunakan kata kunci lain atau pilih kategori berbeda
               </p>
             </div>
           )}
         </div>
       </section>
+
+      {/* Footer Minimalist */}
+      <footer className="bg-[#2D336B] py-16 text-center">
+        <div className="content-container">
+          <span 
+            style={{ fontFamily: 'DashHorizon, sans-serif' }} 
+            className="text-2xl text-white italic tracking-widest"
+          >
+            PUSTAKA <span className="text-[#A9B5DF]">ONLINE</span>
+          </span>
+          <p className="mt-4 text-white/30 text-[10px] tracking-[0.4em] uppercase">
+            © 2026 Crafted for Excellence
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
