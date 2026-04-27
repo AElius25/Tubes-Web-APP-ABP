@@ -1,5 +1,6 @@
-# Tubes-Web-APP-ABP
+# Laprak8 ABP
 Didik:
+
 didik wp@DESKTOP-Q87C3J0 MINGW64 ~/Downloads/Tubes ABP
 $ git init
 Initialized empty Git repository in C:/Users/didik wp/Downloads/Tubes ABP/.git/
@@ -70,9 +71,37 @@ didik wp@DESKTOP-Q87C3J0 MINGW64 ~/Downloads/Tubes ABP (weka-fitur-ui)
 $ git branch
   main
 * weka-fitur-ui
+didik wp@DESKTOP-Q87C3J0 MINGW64 ~/Downloads/Tubes ABP (main)
+$ git branch -D weka-fitur-ui
+Deleted branch weka-fitur-ui (was 9a2cff1).
+
+didik wp@DESKTOP-Q87C3J0 MINGW64 ~/Downloads/Tubes ABP (main)
+$ git checkout -b weka-database
+Switched to a new branch 'weka-database'
+
+didik wp@DESKTOP-Q87C3J0 MINGW64 ~/Downloads/Tubes ABP (weka-database)
+$ git add .
+
+didik wp@DESKTOP-Q87C3J0 MINGW64 ~/Downloads/Tubes ABP (weka-database)
+$ git commit -m "Menambahkan database untuk Tubes"
+On branch weka-database
+nothing to commit, working tree clean
+
+didik wp@DESKTOP-Q87C3J0 MINGW64 ~/Downloads/Tubes ABP (weka-database)
+$ git push -u origin weka-database
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+remote:
+remote: Create a pull request for 'weka-database' on GitHub by visiting:
+remote:      https://github.com/AElius25/Tubes-Web-APP-ABP/pull/new/weka-databas
+e
+remote:
+To https://github.com/AElius25/Tubes-Web-APP-ABP.git
+ * [new branch]      weka-database -> weka-database
+branch 'weka-database' set up to track 'origin/weka-database'.
 
 
 Titanio:
+
 Legion@anzy MINGW64 /c/Tugas IPPL TOKO BUKU (master)
 $ git branch -M main
 
@@ -118,6 +147,7 @@ $ git branch
 * teman-fitur-database
 
 Tugas git branch:
+
 Legion@anzy MINGW64 /c/Tugas IPPL TOKO BUKU (teman-fitur-database)
 $ git branch fitur-baru
 
