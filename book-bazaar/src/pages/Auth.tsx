@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Mail, Lock, User, Store, ShoppingBag } from 'lucide-react';
+import { BookOpen, Mail, Lock, User, Store, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -105,189 +105,167 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-navy-light flex items-center justify-center p-4">
-      {/* Decorative Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-[#2D336B] flex flex-col items-center justify-center p-4 relative overflow-hidden" 
+         style={{ fontFamily: 'Trench, sans-serif' }}>
+      
+      {/* Decorative Blur Elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-[#A9B5DF]/10 rounded-full -ml-48 -mt-48 blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#FFF2F2]/5 rounded-full -mr-48 -mb-48 blur-3xl" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
+      {/* Logo Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md relative"
+        className="mb-8 text-center z-10"
       >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <a href="/" className="inline-flex items-center gap-2">
-            <BookOpen className="h-10 w-10 text-gold" />
-            <span className="font-serif text-3xl font-bold text-primary-foreground">
-              Pustaka<span className="text-gold">Online</span>
-            </span>
-          </a>
+        <a href="/" className="inline-flex items-center gap-3">
+          <BookOpen className="h-10 w-10 text-[#A9B5DF]" />
+          <h1 style={{ fontFamily: 'DashHorizon, sans-serif' }} className="text-4xl text-white italic tracking-widest">
+            PUSTAKA <span className="text-[#A9B5DF]">ONLINE</span>
+          </h1>
+        </a>
+      </motion.div>
+
+      {/* Auth Card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-8 z-10 border border-[#A9B5DF]/20"
+      >
+        {/* Tab Switcher */}
+        <div className="flex bg-[#FFF2F2] p-1.5 rounded-full mb-8">
+          <button
+            onClick={() => setIsLogin(true)}
+            className={`flex-1 py-3 rounded-full text-[10px] font-black tracking-[0.2em] transition-all ${
+              isLogin ? 'bg-[#2D336B] text-white shadow-lg' : 'text-[#7886C7]'
+            }`}
+          >
+            MASUK
+          </button>
+          <button
+            onClick={() => setIsLogin(false)}
+            className={`flex-1 py-3 rounded-full text-[10px] font-black tracking-[0.2em] transition-all ${
+              !isLogin ? 'bg-[#2D336B] text-white shadow-lg' : 'text-[#7886C7]'
+            }`}
+          >
+            DAFTAR
+          </button>
         </div>
 
-        {/* Auth Card */}
-        <div className="bg-card rounded-2xl shadow-xl p-8">
-          {/* Tab Switcher */}
-          <div className="flex rounded-lg bg-muted p-1 mb-6">
-            <button
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all ${
-                isLogin
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Masuk
-            </button>
-            <button
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all ${
-                !isLogin
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Daftar
-            </button>
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.form
-              key={isLogin ? 'login' : 'register'}
-              initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
-              transition={{ duration: 0.2 }}
-              onSubmit={handleSubmit}
-              className="space-y-5"
-            >
-              {!isLogin && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Nama Lengkap</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="fullName"
-                        type="text"
-                        placeholder="Masukkan nama lengkap"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                    {errors.fullName && (
-                      <p className="text-destructive text-sm">{errors.fullName}</p>
-                    )}
+        <AnimatePresence mode="wait">
+          <motion.form
+            key={isLogin ? 'login' : 'register'}
+            initial={{ opacity: 0, x: isLogin ? -10 : 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: isLogin ? 10 : -10 }}
+            transition={{ duration: 0.2 }}
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Nama Lengkap</Label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A9B5DF]" />
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nama lengkap"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="pl-12 bg-[#FFF2F2]/50 border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 text-[#2D336B] tracking-widest text-sm"
+                    />
                   </div>
+                  {errors.fullName && <p className="text-red-500 text-[10px] ml-4 font-bold">{errors.fullName}</p>}
+                </div>
 
-                  {/* Role Selection */}
-                  <div className="space-y-2">
-                    <Label>Daftar Sebagai</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedRole('buyer')}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          selectedRole === 'buyer'
-                            ? 'border-gold bg-gold/10'
-                            : 'border-border hover:border-gold/50'
-                        }`}
-                      >
-                        <ShoppingBag className={`h-6 w-6 mx-auto mb-2 ${
-                          selectedRole === 'buyer' ? 'text-gold' : 'text-muted-foreground'
-                        }`} />
-                        <p className={`font-medium text-sm ${
-                          selectedRole === 'buyer' ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
-                          Pembeli
-                        </p>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedRole('seller')}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          selectedRole === 'seller'
-                            ? 'border-gold bg-gold/10'
-                            : 'border-border hover:border-gold/50'
-                        }`}
-                      >
-                        <Store className={`h-6 w-6 mx-auto mb-2 ${
-                          selectedRole === 'seller' ? 'text-gold' : 'text-muted-foreground'
-                        }`} />
-                        <p className={`font-medium text-sm ${
-                          selectedRole === 'seller' ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
-                          Penjual
-                        </p>
-                      </button>
-                    </div>
+                {/* Role Selection - Blue Style */}
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Daftar Sebagai</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRole('buyer')}
+                      className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        selectedRole === 'buyer'
+                          ? 'border-[#2D336B] bg-[#2D336B]/5'
+                          : 'border-[#FFF2F2] hover:border-[#A9B5DF]/50'
+                      }`}
+                    >
+                      <ShoppingBag className={`h-5 w-5 ${selectedRole === 'buyer' ? 'text-[#2D336B]' : 'text-[#A9B5DF]'}`} />
+                      <span className={`text-[10px] font-black tracking-widest ${selectedRole === 'buyer' ? 'text-[#2D336B]' : 'text-[#7886C7]'}`}>PEMBELI</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRole('seller')}
+                      className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        selectedRole === 'seller'
+                          ? 'border-[#2D336B] bg-[#2D336B]/5'
+                          : 'border-[#FFF2F2] hover:border-[#A9B5DF]/50'
+                      }`}
+                    >
+                      <Store className={`h-5 w-5 ${selectedRole === 'seller' ? 'text-[#2D336B]' : 'text-[#A9B5DF]'}`} />
+                      <span className={`text-[10px] font-black tracking-widest ${selectedRole === 'seller' ? 'text-[#2D336B]' : 'text-[#7886C7]'}`}>PENJUAL</span>
+                    </button>
                   </div>
-                </>
+                </div>
+              </>
+            )}
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A9B5DF]" />
+                <Input
+                  type="email"
+                  placeholder="email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-12 bg-[#FFF2F2]/50 border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 text-[#2D336B] tracking-widest text-sm"
+                />
+              </div>
+              {errors.email && <p className="text-red-500 text-[10px] ml-4 font-bold">{errors.email}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A9B5DF]" />
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-12 bg-[#FFF2F2]/50 border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 text-[#2D336B] tracking-widest text-sm"
+                />
+              </div>
+              {errors.password && <p className="text-red-500 text-[10px] ml-4 font-bold">{errors.password}</p>}
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#2D336B] hover:bg-[#1A1F4D] text-white rounded-full h-14 font-black tracking-[0.3em] text-xs shadow-xl transition-all active:scale-[0.98] mt-4"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>PROSES...</span>
+                </div>
+              ) : (
+                isLogin ? 'MASUK SEKARANG' : 'BUAT AKUN'
               )}
+            </Button>
+          </motion.form>
+        </AnimatePresence>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-destructive text-sm">{errors.email}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                {errors.password && (
-                  <p className="text-destructive text-sm">{errors.password}</p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gold text-secondary-foreground hover:bg-gold-dark font-semibold py-6"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 border-2 border-secondary-foreground/30 border-t-secondary-foreground rounded-full animate-spin" />
-                    {isLogin ? 'Masuk...' : 'Mendaftar...'}
-                  </span>
-                ) : (
-                  isLogin ? 'Masuk' : 'Daftar Sekarang'
-                )}
-              </Button>
-            </motion.form>
-          </AnimatePresence>
-        </div>
-
-        {/* Back to Home */}
-        <p className="text-center mt-6 text-primary-foreground/70">
-          <a href="/" className="hover:text-gold transition-colors">
-            ← Kembali ke Beranda
-          </a>
-        </p>
+        <a 
+          href="/" 
+          className="mt-8 flex items-center justify-center gap-2 text-[#7886C7] hover:text-[#2D336B] transition-colors text-[10px] font-bold tracking-widest uppercase"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          Kembali ke Beranda
+        </a>
       </motion.div>
     </div>
   );
