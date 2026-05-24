@@ -1,272 +1,207 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Mail, Lock, User, Store, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { BookOpen, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { z } from 'zod';
-
-const signUpSchema = z.object({
-  email: z.string().email('Email tidak valid'),
-  password: z.string().min(6, 'Password minimal 6 karakter'),
-  fullName: z.string().min(2, 'Nama minimal 2 karakter'),
-});
-
-const signInSchema = z.object({
-  email: z.string().email('Email tidak valid'),
-  password: z.string().min(1, 'Password tidak boleh kosong'),
-});
-
-type AppRole = 'seller' | 'buyer';
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [selectedRole, setSelectedRole] = useState<AppRole>('buyer');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const { signIn, signUp, user, role } = useAuth();
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user && role) {
-      if (role === 'seller') {
-        navigate('/seller');
-      } else {
-        navigate('/catalog');
-      }
-    }
-  }, [user, role, navigate]);
+  useEffect(() => { if (user) navigate('/'); }, [user, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});
     setLoading(true);
-
     try {
-      if (isLogin) {
-        const result = signInSchema.safeParse({ email, password });
-        if (!result.success) {
-          const fieldErrors: Record<string, string> = {};
-          result.error.errors.forEach((err) => {
-            if (err.path[0]) {
-              fieldErrors[err.path[0] as string] = err.message;
-            }
-          });
-          setErrors(fieldErrors);
-          setLoading(false);
-          return;
-        }
-
+      if (mode === 'login') {
         const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes('Invalid login')) {
-            toast.error('Email atau password salah');
-          } else {
-            toast.error(error.message);
-          }
-        }
+        if (error) toast.error('Email atau password salah');
       } else {
-        const result = signUpSchema.safeParse({ email, password, fullName });
-        if (!result.success) {
-          const fieldErrors: Record<string, string> = {};
-          result.error.errors.forEach((err) => {
-            if (err.path[0]) {
-              fieldErrors[err.path[0] as string] = err.message;
-            }
-          });
-          setErrors(fieldErrors);
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await signUp(email, password, fullName, selectedRole);
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('Email sudah terdaftar. Silakan login.');
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success('Pendaftaran berhasil!');
-        }
+        if (name.trim().length < 2) { toast.error('Nama minimal 2 karakter'); setLoading(false); return; }
+        if (password.length < 6) { toast.error('Password minimal 6 karakter'); setLoading(false); return; }
+        const { error } = await signUp(email, password, name, 'seller');
+        if (error) toast.error(error.message.includes('already') ? 'Email sudah terdaftar' : error.message);
+        else toast.success('Akun berhasil dibuat!');
       }
-    } catch (error) {
-      toast.error('Terjadi kesalahan. Silakan coba lagi.');
-    }
-
+    } catch { toast.error('Terjadi kesalahan'); }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#2D336B] flex flex-col items-center justify-center p-4 relative overflow-hidden" 
-         style={{ fontFamily: 'Trench, sans-serif' }}>
-      
-      {/* Decorative Blur Elements */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-[#A9B5DF]/10 rounded-full -ml-48 -mt-48 blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#FFF2F2]/5 rounded-full -mr-48 -mb-48 blur-3xl" />
+    <div className="min-h-screen flex" style={{ background: 'var(--bg-deep)' }}>
 
-      {/* Logo Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8 text-center z-10"
+      {/* Left Panel */}
+      <motion.aside
+        initial={{ x: -80, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="hidden lg:flex flex-col w-[460px] relative overflow-hidden"
+        style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border)' }}
       >
-        <a href="/" className="inline-flex items-center gap-3">
-          <BookOpen className="h-10 w-10 text-[#A9B5DF]" />
-          <h1 style={{ fontFamily: 'DashHorizon, sans-serif' }} className="text-4xl text-white italic tracking-widest">
-            PUSTAKA <span className="text-[#A9B5DF]">ONLINE</span>
-          </h1>
-        </a>
-      </motion.div>
+        <div className="absolute inset-0 opacity-[0.035]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(245,166,35,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,1) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+        <div className="absolute top-1/3 -left-40 w-[480px] h-[480px] rounded-full opacity-15 blur-[80px] pointer-events-none"
+          style={{ background: 'var(--amber)' }}
+        />
 
-      {/* Auth Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-8 z-10 border border-[#A9B5DF]/20"
-      >
-        {/* Tab Switcher */}
-        <div className="flex bg-[#FFF2F2] p-1.5 rounded-full mb-8">
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 py-3 rounded-full text-[10px] font-black tracking-[0.2em] transition-all ${
-              isLogin ? 'bg-[#2D336B] text-white shadow-lg' : 'text-[#7886C7]'
-            }`}
-          >
-            MASUK
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 py-3 rounded-full text-[10px] font-black tracking-[0.2em] transition-all ${
-              !isLogin ? 'bg-[#2D336B] text-white shadow-lg' : 'text-[#7886C7]'
-            }`}
-          >
-            DAFTAR
-          </button>
+        <div className="relative z-10 flex flex-col h-full p-12">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'var(--amber-glow)', border: '1px solid var(--border-accent)' }}>
+              <BookOpen className="h-5 w-5" style={{ color: 'var(--amber)' }} />
+            </div>
+            <span className="font-display text-xl italic" style={{ color: 'var(--text-primary)' }}>Pustaka Kasir</span>
+          </div>
+
+          <div className="mt-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
+              style={{ background: 'var(--amber-subtle)', border: '1px solid var(--border-accent)' }}>
+              <Sparkles className="h-3 w-3" style={{ color: 'var(--amber)' }} />
+              <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: 'var(--amber)' }}>
+                Point of Sale System
+              </span>
+            </div>
+            <h1 className="font-display text-5xl leading-[1.15] mb-6" style={{ color: 'var(--text-primary)' }}>
+              Kasir Toko Buku<br />
+              <em style={{ color: 'var(--amber)' }}>Profesional</em>
+            </h1>
+            <p className="text-sm leading-relaxed max-w-[280px]" style={{ color: 'var(--text-secondary)' }}>
+              Proses transaksi, kelola inventori, dan pantau penjualan harian dengan mudah.
+            </p>
+          </div>
+
+          <div className="mt-12 space-y-2.5">
+            {[
+              { icon: '⚡', label: 'Transaksi kilat', sub: 'Checkout dalam hitungan detik' },
+              { icon: '📦', label: 'Stok real-time', sub: 'Update otomatis setiap transaksi' },
+              { icon: '🧾', label: 'Struk digital', sub: 'Riwayat transaksi tersimpan' },
+            ].map((f, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 + i * 0.12 }}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                <span className="text-base">{f.icon}</span>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{f.label}</p>
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{f.sub}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
+      </motion.aside>
 
-        <AnimatePresence mode="wait">
-          <motion.form
-            key={isLogin ? 'login' : 'register'}
-            initial={{ opacity: 0, x: isLogin ? -10 : 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: isLogin ? 10 : -10 }}
-            transition={{ duration: 0.2 }}
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
-            {!isLogin && (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Nama Lengkap</Label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A9B5DF]" />
-                    <Input
-                      type="text"
-                      placeholder="Masukkan nama lengkap"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="pl-12 bg-[#FFF2F2]/50 border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 text-[#2D336B] tracking-widest text-sm"
-                    />
-                  </div>
-                  {errors.fullName && <p className="text-red-500 text-[10px] ml-4 font-bold">{errors.fullName}</p>}
-                </div>
+      {/* Right Panel */}
+      <div className="flex-1 flex items-center justify-center p-8 relative">
+        <div className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
 
-                {/* Role Selection - Blue Style */}
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Daftar Sebagai</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedRole('buyer')}
-                      className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                        selectedRole === 'buyer'
-                          ? 'border-[#2D336B] bg-[#2D336B]/5'
-                          : 'border-[#FFF2F2] hover:border-[#A9B5DF]/50'
-                      }`}
-                    >
-                      <ShoppingBag className={`h-5 w-5 ${selectedRole === 'buyer' ? 'text-[#2D336B]' : 'text-[#A9B5DF]'}`} />
-                      <span className={`text-[10px] font-black tracking-widest ${selectedRole === 'buyer' ? 'text-[#2D336B]' : 'text-[#7886C7]'}`}>PEMBELI</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedRole('seller')}
-                      className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                        selectedRole === 'seller'
-                          ? 'border-[#2D336B] bg-[#2D336B]/5'
-                          : 'border-[#FFF2F2] hover:border-[#A9B5DF]/50'
-                      }`}
-                    >
-                      <Store className={`h-5 w-5 ${selectedRole === 'seller' ? 'text-[#2D336B]' : 'text-[#A9B5DF]'}`} />
-                      <span className={`text-[10px] font-black tracking-widest ${selectedRole === 'seller' ? 'text-[#2D336B]' : 'text-[#7886C7]'}`}>PENJUAL</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A9B5DF]" />
-                <Input
-                  type="email"
-                  placeholder="email@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-12 bg-[#FFF2F2]/50 border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 text-[#2D336B] tracking-widest text-sm"
-                />
-              </div>
-              {errors.email && <p className="text-red-500 text-[10px] ml-4 font-bold">{errors.email}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-[#7886C7] tracking-[0.2em] ml-4 uppercase">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A9B5DF]" />
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-12 bg-[#FFF2F2]/50 border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 text-[#2D336B] tracking-widest text-sm"
-                />
-              </div>
-              {errors.password && <p className="text-red-500 text-[10px] ml-4 font-bold">{errors.password}</p>}
-            </div>
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#2D336B] hover:bg-[#1A1F4D] text-white rounded-full h-14 font-black tracking-[0.3em] text-xs shadow-xl transition-all active:scale-[0.98] mt-4"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>PROSES...</span>
-                </div>
-              ) : (
-                isLogin ? 'MASUK SEKARANG' : 'BUAT AKUN'
-              )}
-            </Button>
-          </motion.form>
-        </AnimatePresence>
-
-        <a 
-          href="/" 
-          className="mt-8 flex items-center justify-center gap-2 text-[#7886C7] hover:text-[#2D336B] transition-colors text-[10px] font-bold tracking-widest uppercase"
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+          className="w-full max-w-[400px] relative z-10"
         >
-          <ArrowLeft className="h-3 w-3" />
-          Kembali ke Beranda
-        </a>
-      </motion.div>
+          {/* Mobile Logo */}
+          <div className="flex items-center gap-3 mb-10 lg:hidden">
+            <BookOpen className="h-6 w-6" style={{ color: 'var(--amber)' }} />
+            <span className="font-display text-2xl italic" style={{ color: 'var(--text-primary)' }}>Pustaka Kasir</span>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>
+              {mode === 'login' ? 'Selamat Datang' : 'Buat Akun'}
+            </h2>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              {mode === 'login' ? 'Masuk ke sistem kasir Anda' : 'Daftarkan akun kasir baru'}
+            </p>
+          </div>
+
+          {/* Mode Toggle */}
+          <div className="flex rounded-xl p-1 mb-8"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            {(['login', 'register'] as const).map((m) => (
+              <button key={m} onClick={() => setMode(m)}
+                className="flex-1 py-2.5 rounded-lg text-[11px] font-bold tracking-widest uppercase transition-all duration-200"
+                style={mode === m
+                  ? { background: 'var(--amber)', color: '#0D1120', boxShadow: '0 2px 10px rgba(245,166,35,0.35)' }
+                  : { color: 'var(--text-muted)' }}>
+                {m === 'login' ? 'Masuk' : 'Daftar'}
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.form key={mode}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+              onSubmit={submit} className="space-y-4">
+
+              {mode === 'register' && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-2"
+                    style={{ color: 'var(--text-muted)' }}>Nama Lengkap</label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-ghost)' }} />
+                    <input value={name} onChange={e => setName(e.target.value)}
+                      placeholder="Nama kasir" className="input-pos w-full pl-11" />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2"
+                  style={{ color: 'var(--text-muted)' }}>Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-ghost)' }} />
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="kasir@toko.com" className="input-pos w-full pl-11" required />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2"
+                  style={{ color: 'var(--text-muted)' }}>Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-ghost)' }} />
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••" className="input-pos w-full pl-11" required />
+                </div>
+              </div>
+
+              <button type="submit" disabled={loading}
+                className="btn-amber w-full h-12 flex items-center justify-center gap-2 mt-2"
+                style={{ borderRadius: 12 }}>
+                {loading
+                  ? <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  : <><span>{mode === 'login' ? 'Masuk ke Sistem' : 'Buat Akun'}</span><ArrowRight className="h-4 w-4" /></>
+                }
+              </button>
+            </motion.form>
+          </AnimatePresence>
+
+          <p className="text-center mt-10 text-[10px] tracking-[0.2em]" style={{ color: 'var(--text-ghost)' }}>
+            PUSTAKA KASIR © 2026
+          </p>
+        </motion.div>
+      </div>
     </div>
   );
 }

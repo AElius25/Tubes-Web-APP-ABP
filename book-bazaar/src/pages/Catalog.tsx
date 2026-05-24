@@ -1,10 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Search, BookOpen } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
-import { BookCard } from '@/components/BookCard';
+import { Search, BookOpen, ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
 import { useBooks } from '@/hooks/useBooks';
-import { Input } from '@/components/ui/input';
-import { motion } from 'framer-motion';
+import { useCart } from '@/hooks/useCart';
 
 const categories = [
   'Semua',
@@ -20,9 +17,19 @@ const categories = [
 
 export default function Catalog() {
   const { books, loading } = useBooks();
+  const { 
+    cartItems, 
+    addToCart, 
+    updateQuantity, 
+    removeFromCart, 
+    clearCart, 
+    cartTotal 
+  } = useCart();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
 
+  // Logika Filter
   const filteredBooks = useMemo(() => {
     return books.filter((book) => {
       const matchesSearch =
@@ -34,134 +41,198 @@ export default function Catalog() {
     });
   }, [books, searchQuery, selectedCategory]);
 
+  // Format Rupiah
+  const formatRupiah = (number: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(number);
+  };
+
   return (
-    <div className="min-h-screen bg-[#FFF2F2]" style={{ fontFamily: 'Trench, sans-serif' }}>
-      <Navbar />
-
-      {/* Header - Konsisten dengan tema Blue-Dark */}
-      <section className="bg-[#2D336B] pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#A9B5DF]/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-        <div className="content-container relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <h1 
-              style={{ fontFamily: 'DashHorizon, sans-serif' }}
-              className="text-5xl md:text-6xl text-white italic tracking-widest mb-4"
-            >
-              EXPLORE <span className="text-[#A9B5DF]">CATALOG</span>
-            </h1>
-            <p className="text-white/60 max-w-xl mx-auto uppercase tracking-[0.3em] text-xs">
-              Temukan koleksi literatur original dengan kualitas terbaik
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Search & Filter - Sticky Navigation */}
-      <section className="sticky top-20 z-40 bg-[#FFF2F2]/80 backdrop-blur-md border-b border-[#2D336B]/5 py-6 shadow-sm">
-        <div className="content-container">
-          <div className="flex flex-col lg:flex-row gap-6 items-center">
-            
-            {/* Search Input - Fixed Caps & Color Issues */}
-            <div className="relative w-full lg:w-1/3">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7886C7]" />
-              <Input
-                type="text"
-                placeholder="Cari judul atau penulis..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 bg-white border-[#A9B5DF]/30 focus:border-[#2D336B] focus-visible:ring-[#2D336B] focus-visible:ring-offset-0 rounded-full h-12 tracking-widest text-sm text-[#2D336B]"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex gap-3 overflow-x-auto w-full pb-2 no-scrollbar">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all whitespace-nowrap border ${
-                    selectedCategory === category
-                      ? 'bg-[#2D336B] text-white border-[#2D336B] shadow-lg'
-                      : 'bg-white text-[#2D336B] border-[#A9B5DF]/30 hover:border-[#2D336B]'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+    <div className="min-h-screen bg-slate-50 p-4 font-sans flex flex-col lg:flex-row gap-4">
+      
+      {/* ========================================= */}
+      {/* BAGIAN KIRI: KATALOG BUKU & PENCARIAN     */}
+      {/* ========================================= */}
+      <div className="flex-1 flex flex-col h-[calc(100vh-2rem)]">
+        
+        {/* Header & Search */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-4 shrink-0">
+          <h1 className="text-xl font-bold text-slate-800 mb-4">Sistem Kasir Toko Buku</h1>
+          
+          <div className="relative mb-4">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari judul buku atau penulis..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+          </div>
+          
+          {/* Category Filter */}
+          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                  selectedCategory === category
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
         </div>
-      </section>
 
-      {/* Books Grid */}
-      <section className="py-12">
-        <div className="content-container">
+        {/* Grid Buku */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex-1 overflow-y-auto">
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-[3/4] bg-[#A9B5DF]/20 rounded-2xl" />
-                  <div className="mt-4 h-3 bg-[#A9B5DF]/20 rounded w-3/4" />
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : filteredBooks.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredBooks.map((book) => (
+                <div 
+                  key={book.id}
+                  onClick={() => addToCart(book.id)}
+                  className="group flex flex-col bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-lg transition-all cursor-pointer hover:border-blue-200"
+                >
+                  <div className="h-40 bg-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
+                    {book.cover_image ? (
+                      <img 
+                        src={book.cover_image} 
+                        alt={book.title} 
+                        className="h-full object-contain group-hover:scale-105 transition-transform" 
+                      />
+                    ) : (
+                      <BookOpen className="h-12 w-12 text-slate-300" />
+                    )}
+                  </div>
+                  <div className="p-3 flex flex-col flex-1">
+                    <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-1">
+                      {book.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 mb-3 line-clamp-1">{book.author}</p>
+                    <div className="mt-auto flex items-center justify-between">
+                      <span className="text-blue-600 font-bold text-sm">
+                        {formatRupiah(book.price)}
+                      </span>
+                      <span className="text-[10px] font-medium px-2 py-1 bg-slate-100 text-slate-600 rounded-md">
+                        Stok: {book.stock}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-          ) : filteredBooks.length > 0 ? (
-            <>
-              <div className="flex justify-between items-center mb-8">
-                <p className="text-[#7886C7] text-xs font-bold tracking-[0.2em] uppercase">
-                  Menampilkan {filteredBooks.length} Buku
-                </p>
-                <div className="h-[1px] flex-1 bg-[#2D336B]/5 ml-6" />
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                {filteredBooks.map((book, index) => (
-                  <motion.div
-                    key={book.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: (index % 5) * 0.1 }}
-                  >
-                    <BookCard book={book} index={index} />
-                  </motion.div>
-                ))}
-              </div>
-            </>
           ) : (
-            <div className="text-center py-32 bg-white rounded-[3rem] border border-[#A9B5DF]/20 shadow-sm">
-              <BookOpen className="h-16 w-16 text-[#A9B5DF] mx-auto mb-6 opacity-30" />
-              <h3 
-                style={{ fontFamily: 'DashHorizon, sans-serif' }}
-                className="text-2xl text-[#2D336B] italic tracking-widest mb-2"
-              >
-                NOT <span className="text-[#A9B5DF]">FOUND</span>
-              </h3>
-              <p className="text-[#7886C7] text-sm uppercase tracking-widest">
-                Coba gunakan kata kunci lain atau pilih kategori berbeda
-              </p>
+            <div className="flex flex-col items-center justify-center h-full text-slate-400">
+              <BookOpen className="h-16 w-16 mb-4 opacity-20" />
+              <p className="text-sm font-medium">Tidak ada buku yang ditemukan</p>
             </div>
           )}
         </div>
-      </section>
+      </div>
 
-      {/* Footer Minimalist */}
-      <footer className="bg-[#2D336B] py-16 text-center">
-        <div className="content-container">
-          <span 
-            style={{ fontFamily: 'DashHorizon, sans-serif' }} 
-            className="text-2xl text-white italic tracking-widest"
-          >
-            PUSTAKA <span className="text-[#A9B5DF]">ONLINE</span>
-          </span>
-          <p className="mt-4 text-white/30 text-[10px] tracking-[0.4em] uppercase">
-            © 2026 Crafted for Excellence
-          </p>
+      {/* ========================================= */}
+      {/* BAGIAN KANAN: KERANJANG / STRUK KASIR     */}
+      {/* ========================================= */}
+      <div className="w-full lg:w-[400px] h-[calc(100vh-2rem)] shrink-0 flex flex-col bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+        
+        {/* Cart Header */}
+        <div className="p-5 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5 text-blue-600" />
+            <h2 className="font-bold text-slate-800">Pesanan Saat Ini</h2>
+          </div>
+          {cartItems.length > 0 && (
+            <button 
+              onClick={clearCart}
+              className="text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+            >
+              Kosongkan
+            </button>
+          )}
         </div>
-      </footer>
+
+        {/* Cart Items List */}
+        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-4 space-y-3">
+          {cartItems.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-slate-400">
+              <ShoppingCart className="h-12 w-12 mb-3 opacity-20" />
+              <p className="text-sm text-center">Keranjang kosong.<br/>Klik buku untuk menambahkan.</p>
+            </div>
+          ) : (
+            cartItems.map((item) => (
+              <div key={item.id} className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                <div className="flex justify-between mb-2">
+                  <h4 className="text-sm font-semibold text-slate-800 line-clamp-2 pr-4">
+                    {item.book?.title}
+                  </h4>
+                  <span className="text-sm font-bold text-blue-600 shrink-0">
+                    {formatRupiah((item.book?.price || 0) * item.quantity)}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-slate-500">
+                    {formatRupiah(item.book?.price || 0)} / item
+                  </span>
+                  
+                  {/* Quantity Controls */}
+                  <div className="flex items-center gap-3 bg-slate-50 rounded-lg p-1 border border-slate-100">
+                    <button 
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="p-1 hover:bg-white rounded shadow-sm transition-colors"
+                    >
+                      {item.quantity <= 1 ? (
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      ) : (
+                        <Minus className="h-4 w-4 text-slate-600" />
+                      )}
+                    </button>
+                    <span className="text-sm font-bold text-slate-800 w-4 text-center">
+                      {item.quantity}
+                    </span>
+                    <button 
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="p-1 hover:bg-white rounded shadow-sm transition-colors"
+                    >
+                      <Plus className="h-4 w-4 text-slate-600" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Checkout Footer */}
+        <div className="p-5 bg-white border-t border-slate-100 shrink-0">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-slate-500 font-medium">Total Tagihan</span>
+            <span className="text-2xl font-bold text-blue-600">
+              {formatRupiah(cartTotal)}
+            </span>
+          </div>
+          <button 
+            disabled={cartItems.length === 0}
+            onClick={() => alert('Sistem Pembayaran / Struk Kasir akan diproses di sini.')}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98]"
+          >
+            Bayar Sekarang
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }

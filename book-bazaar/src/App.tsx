@@ -4,11 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth";
-import Index from "./pages/Index";
+import POS from "./pages/POS";
 import Auth from "./pages/Auth";
-import Catalog from "./pages/Catalog";
-import Cart from "./pages/Cart";
-import SellerDashboard from "./pages/SellerDashboard";
+import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -17,16 +15,14 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner richColors />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/catalog" element={<Catalog />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/seller" element={<SellerDashboard />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/"          element={<POS />} />
+            <Route path="/auth"      element={<Auth />} />
+            <Route path="/inventory" element={<Inventory />} />
+            <Route path="*"          element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
