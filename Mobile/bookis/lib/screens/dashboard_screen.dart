@@ -28,8 +28,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TransactionProvider>().loadDummySales();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Load data dari Supabase saat app pertama dibuka
+      await context.read<BookProvider>().loadBooks();
+      await context.read<TransactionProvider>().loadTransactions();
     });
   }
 
@@ -94,7 +96,7 @@ class _DashboardHome extends StatelessWidget {
           children: [
             Icon(Icons.auto_stories, size: 22),
             SizedBox(width: 8),
-            Text('Bookish POS'),
+            Text('Kedai Buku'),
           ],
         ),
         actions: [

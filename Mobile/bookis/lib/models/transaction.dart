@@ -1,6 +1,6 @@
 import 'cart_item.dart';
 
-enum PaymentMethod { cash, qris, transfer, debit }
+enum PaymentMethod { cash, qris }  // ← hanya Tunai dan QRIS
 enum TransactionStatus { completed, refunded, voided }
 
 class TransactionItem {
@@ -23,14 +23,17 @@ class TransactionItem {
   double get subtotal => unitPrice * quantity * (1 - discount / 100);
 
   Map<String, dynamic> toJson() => {
-    'bookId': bookId, 'bookTitle': bookTitle, 'bookAuthor': bookAuthor,
-    'unitPrice': unitPrice, 'quantity': quantity, 'discount': discount,
+    'book_id': bookId, 'book_title': bookTitle, 'book_author': bookAuthor,
+    'unit_price': unitPrice, 'quantity': quantity, 'discount': discount,
   };
 
   factory TransactionItem.fromJson(Map<String, dynamic> j) => TransactionItem(
-    bookId: j['bookId'], bookTitle: j['bookTitle'],
-    bookAuthor: j['bookAuthor'], unitPrice: (j['unitPrice'] as num).toDouble(),
-    quantity: j['quantity'], discount: (j['discount'] as num).toDouble(),
+    bookId: j['book_id'] ?? j['bookId'] ?? '',
+    bookTitle: j['book_title'] ?? j['bookTitle'] ?? '',
+    bookAuthor: j['book_author'] ?? j['bookAuthor'] ?? '',
+    unitPrice: (j['unit_price'] ?? j['unitPrice'] as num).toDouble(),
+    quantity: j['quantity'] ?? 1,
+    discount: ((j['discount'] ?? 0) as num).toDouble(),
   );
 }
 
@@ -69,23 +72,59 @@ class Transaction {
     this.cashierName = 'Kasir',
   });
 
-  int get totalItems => items.fold(0, (sum, i) => sum + i.quantity);
+  int get totalItems => items.fold(0, (s, i) => s + i.quantity);
+
+  /// Dari Supabase — snake_case, items sudah di-join
+  factory Transaction.fromJson(Map<String, dynamic> j) {
+    final itemsRaw = j['items'] ?? j['transaction_items'] ?? [];
+    final items = (itemsRaw as List)
+        .map((i) => TransactionItem.fromJson(i as Map<String, dynamic>))
+        .toList();
+
+    PaymentMethod method = PaymentMethod.cash;
+    final m = j['payment_method'] ?? 'cash';
+    if (m == 'qris') method = PaymentMethod.qris;
+
+    TransactionStatus status = TransactionStatus.completed;
+    final s = j['status'] ?? 'completed';
+    if (s == 'voided') status = TransactionStatus.voided;
+    if (s == 'refunded') status = TransactionStatus.refunded;
+
+    return Transaction(
+      id: j['id'].toString(),
+      receiptNumber: j['receipt_number'] ?? j['receiptNumber'] ?? '',
+      createdAt: j['created_at'] != null
+          ? DateTime.parse(j['created_at'])
+          : DateTime.now(),
+      items: items,
+      subtotal: ((j['subtotal'] ?? 0) as num).toDouble(),
+      discount: ((j['discount'] ?? 0) as num).toDouble(),
+      tax: ((j['tax'] ?? 0) as num).toDouble(),
+      total: ((j['total'] ?? 0) as num).toDouble(),
+      amountPaid: ((j['amount_paid'] ?? 0) as num).toDouble(),
+      change: ((j['change'] ?? 0) as num).toDouble(),
+      paymentMethod: method,
+      status: status,
+      customerName: j['customer_name'],
+      notes: j['notes'],
+      cashierName: j['cashier_name'] ?? 'Kasir',
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'receiptNumber': receiptNumber,
-    'createdAt': createdAt.toIso8601String(),
-    'items': items.map((i) => i.toJson()).toList(),
+    'receipt_number': receiptNumber,
+    'created_at': createdAt.toIso8601String(),
     'subtotal': subtotal,
     'discount': discount,
     'tax': tax,
     'total': total,
-    'amountPaid': amountPaid,
+    'amount_paid': amountPaid,
     'change': change,
-    'paymentMethod': paymentMethod.name,
+    'payment_method': paymentMethod.name,
     'status': status.name,
-    'customerName': customerName,
+    'customer_name': customerName,
     'notes': notes,
-    'cashierName': cashierName,
+    'cashier_name': cashierName,
   };
 }

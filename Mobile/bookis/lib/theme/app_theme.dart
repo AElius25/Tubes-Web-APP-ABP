@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class BookishTheme {
+class KedaiBukuTheme {
   // Color Palette — warm literary aesthetic
   static const Color primary = Color(0xFF1A1A2E);       // Deep navy
   static const Color primaryLight = Color(0xFF16213E);  // Navy light

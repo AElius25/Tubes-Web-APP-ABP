@@ -1,14 +1,18 @@
 import 'package:flutter/foundation.dart';
 import '../models/book.dart';
+import '../services/supabase_service.dart';
 
 class BookProvider extends ChangeNotifier {
   List<Book> _books = [];
   String _searchQuery = '';
   String _selectedCategory = 'Semua';
+  bool _loading = false;
+  String? _error;
 
   List<Book> get books => _filteredBooks;
   List<Book> get allBooks => _books;
-  String get searchQuery => _searchQuery;
+  bool get isLoading => _loading;
+  String? get error => _error;
   String get selectedCategory => _selectedCategory;
 
   List<String> get categories {
@@ -23,11 +27,12 @@ class BookProvider extends ChangeNotifier {
     }
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
-      list = list.where((b) =>
-        b.title.toLowerCase().contains(q) ||
-        b.author.toLowerCase().contains(q) ||
-        b.isbn.contains(q)
-      ).toList();
+      list = list
+          .where((b) =>
+              b.title.toLowerCase().contains(q) ||
+              b.author.toLowerCase().contains(q) ||
+              b.isbn.contains(q))
+          .toList();
     }
     return list;
   }
@@ -45,77 +50,82 @@ class BookProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addBook(Book book) {
-    _books.add(book);
-    notifyListeners();
-  }
+  // ─── Supabase Operations ────────────────────────────────────────────────────
 
-  void updateBook(Book updated) {
-    final idx = _books.indexWhere((b) => b.id == updated.id);
-    if (idx != -1) {
-      _books[idx] = updated;
+  /// Load semua buku dari Supabase saat app buka
+  Future<void> loadBooks() async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _books = await SupabaseService.fetchBooks();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _loading = false;
       notifyListeners();
     }
   }
 
-  void deleteBook(String id) {
-    _books.removeWhere((b) => b.id == id);
-    notifyListeners();
+  /// Tambah buku baru → simpan ke Supabase → update list lokal
+  Future<void> addBook(Book book) async {
+    try {
+      final saved = await SupabaseService.insertBook(book);
+      _books.add(saved);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
   }
 
-  void decreaseStock(String id, int qty) {
-    final idx = _books.indexWhere((b) => b.id == id);
-    if (idx != -1) {
-      _books[idx].stock -= qty;
+  /// Edit buku → update Supabase → update list lokal
+  Future<void> updateBook(Book updated) async {
+    try {
+      await SupabaseService.updateBook(updated);
+      final idx = _books.indexWhere((b) => b.id == updated.id);
+      if (idx != -1) {
+        _books[idx] = updated;
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  /// Hapus buku → hapus dari Supabase → hapus dari list lokal
+  Future<void> deleteBook(String id) async {
+    try {
+      await SupabaseService.deleteBook(id);
+      _books.removeWhere((b) => b.id == id);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  /// Kurangi stok lewat Supabase stored procedure
+  Future<void> decreaseStock(String id, int qty) async {
+    try {
+      await SupabaseService.decreaseStock(id, qty);
+      // Update juga di RAM agar UI langsung berubah tanpa fetch ulang
+      final idx = _books.indexWhere((b) => b.id == id);
+      if (idx != -1) {
+        _books[idx].stock -= qty;
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
       notifyListeners();
     }
   }
 
-  Book? findById(String id) =>
-      _books.where((b) => b.id == id).isNotEmpty
-          ? _books.firstWhere((b) => b.id == id)
-          : null;
-
-  void loadDummyData() {
-    _books = [
-      Book(id: '1', title: 'Laskar Pelangi', author: 'Andrea Hirata',
-          isbn: '9789793062792', category: 'Fiksi', price: 89000,
-          stock: 15, publisher: 'Bentang Pustaka', year: 2005),
-      Book(id: '2', title: 'Bumi Manusia', author: 'Pramoedya Ananta Toer',
-          isbn: '9789799731234', category: 'Sosial', price: 112000,
-          stock: 8, publisher: 'Lentera Dipantara', year: 1980),
-      Book(id: '3', title: 'Atomic Habits', author: 'James Clear',
-          isbn: '9781847941831', category: 'Produktivitas', price: 138000,
-          stock: 20, publisher: 'Random House', year: 2018),
-      Book(id: '4', title: 'Sapiens', author: 'Yuval Noah Harari',
-          isbn: '9780062316110', category: 'Sejarah', price: 165000,
-          stock: 5, publisher: 'Harper Collins', year: 2011),
-      Book(id: '5', title: 'Filosofi Teras', author: 'Henry Manampiring',
-          isbn: '9786020649221', category: 'Produktivitas', price: 98000,
-          stock: 12, publisher: 'Kompas', year: 2018),
-      Book(id: '6', title: 'Dilan 1990', author: 'Pidi Baiq',
-          isbn: '9786021600375', category: 'Fiksi', price: 75000,
-          stock: 3, publisher: 'Mizan', year: 2014),
-      Book(id: '7', title: 'Rich Dad Poor Dad', author: 'Robert Kiyosaki',
-          isbn: '9781612680194', category: 'Keuangan', price: 125000,
-          stock: 18, publisher: 'Plata Publishing', year: 1997),
-      Book(id: '8', title: 'The Psychology of Money', author: 'Morgan Housel',
-          isbn: '9780857197689', category: 'Keuangan', price: 148000,
-          stock: 0, publisher: 'Harriman House', year: 2020),
-      Book(id: '9', title: 'Negeri 5 Menara', author: 'Ahmad Fuadi',
-          isbn: '9786020301839', category: 'Fiksi', price: 85000,
-          stock: 10, publisher: 'Gramedia', year: 2009),
-      Book(id: '10', title: 'Sebuah Seni untuk Bersikap Bodo Amat',
-          author: 'Mark Manson', isbn: '9786020385792',
-          category: 'Produktivitas', price: 98000,
-          stock: 25, publisher: 'Gramedia', year: 2016),
-      Book(id: '11', title: 'Pulang', author: 'Tere Liye',
-          isbn: '9786020323763', category: 'Fiksi', price: 79000,
-          stock: 2, publisher: 'Republika', year: 2015),
-      Book(id: '12', title: 'Zero to One', author: 'Peter Thiel',
-          isbn: '9780804139021', category: 'Bisnis', price: 145000,
-          stock: 7, publisher: 'Crown Business', year: 2014),
-    ];
-    notifyListeners();
-  }
+  Book? findById(String id) => _books.where((b) => b.id == id).isNotEmpty
+      ? _books.firstWhere((b) => b.id == id)
+      : null;
 }

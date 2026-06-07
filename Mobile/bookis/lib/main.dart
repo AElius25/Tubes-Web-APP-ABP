@@ -7,31 +7,34 @@ import 'providers/cart_provider.dart';
 import 'providers/book_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'screens/dashboard_screen.dart';
+import 'services/supabase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('id', null); // ← tambah ini
+  await initializeDateFormatting('id', null);
+  // Inisialisasi Supabase sebelum runApp
+  await SupabaseService.initialize();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-  runApp(const BookishPOSApp());
+  runApp(const KedaiBukuApp());
 }
 
-class BookishPOSApp extends StatelessWidget {
-  const BookishPOSApp({super.key});
+class KedaiBukuApp extends StatelessWidget {
+  const KedaiBukuApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => BookProvider()..loadDummyData()),
+        ChangeNotifierProvider(create: (_) => BookProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => TransactionProvider()),
       ],
       child: MaterialApp(
-        title: 'Bookish POS',
+        title: 'Kedai Buku',
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
         home: const DashboardScreen(),

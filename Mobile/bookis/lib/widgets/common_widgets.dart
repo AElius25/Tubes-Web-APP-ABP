@@ -18,7 +18,7 @@ class StatCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.icon,
-    this.iconColor = BookishTheme.accent,
+    this.iconColor = KedaiBukuTheme.accent,
     this.iconBg,
     this.subtitle,
   });
@@ -28,9 +28,9 @@ class StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BookishTheme.cardBg,
+        color: KedaiBukuTheme.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BookishTheme.divider),
+        border: Border.all(color: KedaiBukuTheme.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,9 +100,9 @@ class BookCard extends StatelessWidget {
   });
 
   Color get _stockColor {
-    if (stock == 0) return BookishTheme.error;
-    if (stock <= 5) return BookishTheme.warning;
-    return BookishTheme.success;
+    if (stock == 0) return KedaiBukuTheme.error;
+    if (stock <= 5) return KedaiBukuTheme.warning;
+    return KedaiBukuTheme.success;
   }
 
   @override
@@ -111,9 +111,9 @@ class BookCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: BookishTheme.cardBg,
+          color: KedaiBukuTheme.cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: BookishTheme.divider),
+          border: Border.all(color: KedaiBukuTheme.divider),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +122,7 @@ class BookCard extends StatelessWidget {
             Container(
               height: 120,
               decoration: BoxDecoration(
-                color: BookishTheme.primary.withOpacity(0.08),
+                color: KedaiBukuTheme.primary.withOpacity(0.08),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(15)),
               ),
@@ -130,7 +130,7 @@ class BookCard extends StatelessWidget {
                 child: Icon(
                   Icons.menu_book_rounded,
                   size: 40,
-                  color: BookishTheme.primary.withOpacity(0.3),
+                  color: KedaiBukuTheme.primary.withOpacity(0.3),
                 ),
               ),
             ),
@@ -144,14 +144,14 @@ class BookCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: BookishTheme.accent.withOpacity(0.15),
+                      color: KedaiBukuTheme.accent.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       category,
                       style: const TextStyle(
                         fontSize: 10,
-                        color: BookishTheme.accentDeep,
+                        color: KedaiBukuTheme.accentDeep,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -178,7 +178,7 @@ class BookCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: BookishTheme.primary,
+                          color: KedaiBukuTheme.primary,
                         ),
                       ),
                       // Stock badge
@@ -252,7 +252,7 @@ class SectionHeader extends StatelessWidget {
             child: Text(
               actionLabel!,
               style: const TextStyle(
-                color: BookishTheme.accent,
+                color: KedaiBukuTheme.accent,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -287,7 +287,7 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 64, color: BookishTheme.textLight),
+            Icon(icon, size: 64, color: KedaiBukuTheme.textLight),
             const SizedBox(height: 16),
             Text(
               title,

@@ -117,8 +117,8 @@ class _TransactionTile extends StatelessWidget {
     switch (m) {
       case PaymentMethod.cash: return 'Tunai';
       case PaymentMethod.qris: return 'QRIS';
-      case PaymentMethod.transfer: return 'Transfer';
-      case PaymentMethod.debit: return 'Debit';
+      
+      
     }
   }
 

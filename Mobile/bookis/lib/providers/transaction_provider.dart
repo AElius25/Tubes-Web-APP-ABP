@@ -1,12 +1,17 @@
 import 'package:flutter/foundation.dart';
 import '../models/transaction.dart';
 import '../models/cart_item.dart';
+import '../services/supabase_service.dart';
 
 class TransactionProvider extends ChangeNotifier {
-  final List<Transaction> _transactions = [];
+  List<Transaction> _transactions = [];
   int _receiptCounter = 1001;
+  bool _loading = false;
+  String? _error;
 
   List<Transaction> get transactions => List.unmodifiable(_transactions);
+  bool get isLoading => _loading;
+  String? get error => _error;
 
   List<Transaction> get todayTransactions {
     final now = DateTime.now();
@@ -14,19 +19,15 @@ class TransactionProvider extends ChangeNotifier {
       t.createdAt.year == now.year &&
       t.createdAt.month == now.month &&
       t.createdAt.day == now.day &&
-      t.status == TransactionStatus.completed
-    ).toList();
+      t.status == TransactionStatus.completed).toList();
   }
 
   double get todayRevenue =>
       todayTransactions.fold(0.0, (s, t) => s + t.total);
-
   int get todayItemsSold =>
       todayTransactions.fold(0, (s, t) => s + t.totalItems);
-
   int get todayTransactionCount => todayTransactions.length;
 
-  // Weekly revenue for chart
   List<double> get weeklyRevenue {
     final now = DateTime.now();
     return List.generate(7, (i) {
@@ -41,7 +42,6 @@ class TransactionProvider extends ChangeNotifier {
     });
   }
 
-  // Top selling books
   Map<String, int> get topSellingBooks {
     final Map<String, int> counts = {};
     for (final t in _transactions) {
@@ -55,13 +55,38 @@ class TransactionProvider extends ChangeNotifier {
     return Map.fromEntries(sorted.take(5));
   }
 
+  // ─── Supabase Operations ────────────────────────────────────────────────────
+
+  /// Load semua transaksi dari Supabase
+  Future<void> loadTransactions() async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _transactions = await SupabaseService.fetchTransactions();
+      // Set counter dari nomor terbesar yang ada
+      if (_transactions.isNotEmpty) {
+        final nums = _transactions
+            .map((t) => int.tryParse(t.receiptNumber.split('-').last) ?? 0)
+            .toList();
+        _receiptCounter = (nums.reduce((a, b) => a > b ? a : b)) + 1;
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
   String _generateReceiptNumber() {
     final now = DateTime.now();
     final prefix = 'INV${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     return '$prefix-${_receiptCounter++}';
   }
 
-  Transaction createTransaction({
+  /// Buat transaksi baru → simpan ke Supabase → tambah ke list lokal
+  Future<Transaction> createTransaction({
     required List<CartItem> cartItems,
     required double subtotal,
     required double discount,
@@ -71,77 +96,44 @@ class TransactionProvider extends ChangeNotifier {
     required PaymentMethod paymentMethod,
     String? customerName,
     String? notes,
-  }) {
-    final items = cartItems.map((ci) => TransactionItem(
-      bookId: ci.book.id,
-      bookTitle: ci.book.title,
-      bookAuthor: ci.book.author,
-      unitPrice: ci.book.price,
-      quantity: ci.quantity,
-      discount: ci.discount ?? 0,
-    )).toList();
-
-    final transaction = Transaction(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      receiptNumber: _generateReceiptNumber(),
-      createdAt: DateTime.now(),
-      items: items,
+  }) async {
+    final receiptNumber = _generateReceiptNumber();
+    final transaction = await SupabaseService.insertTransaction(
+      cartItems: cartItems,
       subtotal: subtotal,
       discount: discount,
       tax: tax,
       total: total,
       amountPaid: amountPaid,
-      change: amountPaid - total,
       paymentMethod: paymentMethod,
       customerName: customerName,
       notes: notes,
+      receiptNumber: receiptNumber,
     );
-
     _transactions.insert(0, transaction);
     notifyListeners();
     return transaction;
   }
 
-  void voidTransaction(String id) {
-    final idx = _transactions.indexWhere((t) => t.id == id);
-    if (idx != -1) {
-      _transactions[idx].status = TransactionStatus.voided;
+  /// Batalkan transaksi di Supabase + update lokal
+  Future<void> voidTransaction(String id) async {
+    try {
+      await SupabaseService.voidTransaction(id);
+      final idx = _transactions.indexWhere((t) => t.id == id);
+      if (idx != -1) {
+        _transactions[idx].status = TransactionStatus.voided;
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
       notifyListeners();
     }
-  }
-
-  void loadDummySales() {
-    // Add some historical data for dashboard chart
-    final now = DateTime.now();
-    final random = [145000.0, 220000.0, 89000.0, 310000.0, 175000.0, 260000.0];
-    for (int i = 6; i >= 1; i--) {
-      final day = now.subtract(Duration(days: i));
-      if (random[6 - i] > 0) {
-        _transactions.add(Transaction(
-          id: 'dummy_$i',
-          receiptNumber: 'INV-DUMMY-$i',
-          createdAt: day.copyWith(hour: 14),
-          items: [TransactionItem(
-            bookId: 'dummy',
-            bookTitle: 'Sample Book',
-            bookAuthor: 'Author',
-            unitPrice: random[6 - i],
-            quantity: 1,
-          )],
-          subtotal: random[6 - i],
-          total: random[6 - i],
-          amountPaid: random[6 - i],
-          change: 0,
-          paymentMethod: PaymentMethod.cash,
-        ));
-      }
-    }
-    notifyListeners();
   }
 }
 
 extension DateTimeCopyWith on DateTime {
-  DateTime copyWith({int? year, int? month, int? day, int? hour, int? minute, int? second}) {
+  DateTime copyWith({int? year, int? month, int? day,
+      int? hour, int? minute, int? second}) {
     return DateTime(year ?? this.year, month ?? this.month, day ?? this.day,
         hour ?? this.hour, minute ?? this.minute, second ?? this.second);
   }

@@ -28,7 +28,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     return Consumer2<BooksProvider, CartProvider>(
       builder: (context, books, cart, _) {
         return Scaffold(
-          backgroundColor: BookishTheme.surface,
+          backgroundColor: KedaiBukuTheme.surface,
           appBar: AppBar(
             title: const Text('Kasir'),
             actions: [
@@ -50,7 +50,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
-                          color: BookishTheme.accent,
+                          color: KedaiBukuTheme.accent,
                           shape: BoxShape.circle,
                         ),
                         child: Text(
@@ -77,7 +77,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   onChanged: books.setSearch,
                   decoration: const InputDecoration(
                     hintText: 'Cari judul, penulis, ISBN...',
-                    prefixIcon: Icon(Icons.search, color: BookishTheme.textLight),
+                    prefixIcon: Icon(Icons.search, color: KedaiBukuTheme.textLight),
                     suffixIcon: null,
                   ),
                 ),
@@ -99,12 +99,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         label: Text(cat),
                         selected: isSelected,
                         onSelected: (_) => books.setCategory(cat),
-                        backgroundColor: BookishTheme.cardBg,
-                        selectedColor: BookishTheme.primary,
+                        backgroundColor: KedaiBukuTheme.cardBg,
+                        selectedColor: KedaiBukuTheme.primary,
                         labelStyle: TextStyle(
                           color: isSelected
                               ? Colors.white
-                              : BookishTheme.textSecondary,
+                              : KedaiBukuTheme.textSecondary,
                           fontSize: 12,
                           fontWeight: isSelected
                               ? FontWeight.w600
@@ -112,8 +112,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         ),
                         side: BorderSide(
                           color: isSelected
-                              ? BookishTheme.primary
-                              : BookishTheme.divider,
+                              ? KedaiBukuTheme.primary
+                              : KedaiBukuTheme.divider,
                         ),
                         showCheckmark: false,
                       ),
@@ -157,7 +157,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                                   content: Text(
                                       '"${book.title}" ditambahkan ke keranjang'),
                                   duration: const Duration(seconds: 1),
-                                  backgroundColor: BookishTheme.success,
+                                  backgroundColor: KedaiBukuTheme.success,
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -174,7 +174,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     context,
                     MaterialPageRoute(builder: (_) => const CartScreen()),
                   ),
-                  backgroundColor: BookishTheme.primary,
+                  backgroundColor: KedaiBukuTheme.primary,
                   icon: const Icon(Icons.shopping_cart, color: Colors.white),
                   label: Text(
                     '${cart.totalItems} item · lihat keranjang',

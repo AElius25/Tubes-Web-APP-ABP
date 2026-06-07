@@ -7,6 +7,8 @@
     <!-- READ_EXTERNAL_STORAGE untuk Android < 13 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- Internet untuk Supabase -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="bookis"
