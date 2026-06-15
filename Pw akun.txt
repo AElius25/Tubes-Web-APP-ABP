@@ -1,2 +1,7 @@
 iqbal@gmail.com
 admin123
+
+Cara run:
+npm install dahulu kemudian jalankan perintah npm run dev
+
+note: aplikasi ini perlu kunci dari database langsung dan bersifat private jadi perlu minta ijin dahulu
